@@ -21,7 +21,7 @@ DEFAULT_MODEL_PATH = "third_party/MiDaS/weights/dpt_large-midas-2f21e586.pt"
 
 def cl_parser():
     parser = argparse.ArgumentParser(description="Animation properties")
-    parser.add_argument('--gif_duration', default=4, type=float, help='total duration of output gif (in seconds)')
+    parser.add_argument('--gif_duration', default=8, type=float, help='total duration of output gif (in seconds)')
     parser.add_argument('--gif_frame_rate', default=15, type=int, help='frame rate of output gif (in frames per second)')
     parser.add_argument('--resolution', default=[720, 1280], type=list, help='target resolution of output gif')
     parser.add_argument('--image_path', default=DEFAULT_INPUT_PATH, type=str, help='path to input image')
@@ -51,7 +51,7 @@ def main():
     #inlier_points, inlier_indices = display_inlier_outlier(pcd, ind)
     cleaned_pcd = pcd.select_by_index(ind)
     assert pcd.has_colors(), "Colors could not be added to the point cloud"
-    open3d.visualization.draw_geometries([pcd])
+    #open3d.visualization.draw_geometries([pcd])
     
     
     pinhole = open3d.camera.PinholeCameraIntrinsic(resolution[0], resolution[1], 1000, 1000, resolution[0]/2, resolution[1]/2)
@@ -80,8 +80,6 @@ def main():
         os.remove(args.output_path)
     with imageio.get_writer(args.output_path, mode='I', fps = args.gif_frame_rate) as writer:
         for i in tqdm(range(num_steps)): 
-    
-            # render the scene with respect to the camera
             vertical_field_of_view = current_FOV  
             aspect_ratio = resolution[0]/resolution[1] 
             near_plane = 0.5
@@ -91,10 +89,17 @@ def main():
             render.scene.camera.look_at(current_center, current_eye, current_up)
             img_o3d = np.array(render.render_to_image())
             writer.append_data(img_o3d)
-            current_center = current_center + (delta_center/num_steps)
-            current_eye = current_eye + (delta_eye/num_steps)
-            current_up = current_up + (delta_up/num_steps)
-            current_FOV = current_FOV + (delta_FOV/num_steps)
+            if i<=num_steps/2:
+                current_center = current_center + (delta_center/num_steps)
+                current_eye = current_eye + (delta_eye/num_steps)
+                current_up = current_up + (delta_up/num_steps)
+                current_FOV = current_FOV + (delta_FOV/num_steps)
+            else:
+                current_center = current_center - (delta_center/num_steps)
+                current_eye = current_eye - (delta_eye/num_steps)
+                current_up = current_up - (delta_up/num_steps)
+                current_FOV = current_FOV - (delta_FOV/num_steps)
+                
     writer.close() 
 
 if __name__ == "__main__":
