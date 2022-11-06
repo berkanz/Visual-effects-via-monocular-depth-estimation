@@ -63,15 +63,15 @@ def main():
     current_up = np.array([0, -180, 10])  # camera orientation+
     current_FOV = 65
     
-    final_center = np.array([0, -0.05, 1])  # look_at target
-    final_eye = np.array([0, 0, -0.1])  # camera position
+    final_center = np.array([0.0, 0.0, 1.0])  # look_at target
+    final_eye = np.array([0, 0, 0])  # camera position
     final_up = np.array([0, -180, 0])  # camera orientation
     final_FOV = 105
     delta_center = final_center - current_center
     delta_eye = final_eye - current_eye
     delta_up = final_up - current_up
     delta_FOV = final_FOV - current_FOV
-    num_steps = 10
+    num_steps = args.gif_duration * args.gif_frame_rate
     render = rendering.OffscreenRenderer(resolution[0], resolution[1])
     # setup camera intrinsic values
     render.scene.add_geometry("generated_pointcloud", cleaned_pcd, mtl)
@@ -79,7 +79,7 @@ def main():
     if os.path.exists(args.output_path):
         os.remove(args.output_path)
     with imageio.get_writer(args.output_path, mode='I', fps = args.gif_frame_rate) as writer:
-        for i in tqdm(range(num_steps)):
+        for i in tqdm(range(num_steps)): 
     
             # render the scene with respect to the camera
             vertical_field_of_view = current_FOV  
@@ -88,7 +88,6 @@ def main():
             far_plane = 2
             fov_type = open3d.visualization.rendering.Camera.FovType.Vertical
             render.scene.camera.set_projection(vertical_field_of_view, aspect_ratio, near_plane, far_plane, fov_type)
-            
             render.scene.camera.look_at(current_center, current_eye, current_up)
             img_o3d = np.array(render.render_to_image())
             writer.append_data(img_o3d)
