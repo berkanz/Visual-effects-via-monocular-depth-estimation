@@ -20,8 +20,7 @@ Generated animation will be saved at /output subfolder.
 python animate.py --help
 ```
 
-```
-  --help                  show this help message and exit                     
+```            
   --gif_duration          total duration of output gif (in seconds)           [float]
   --gif_frame_rate        frame rate of output gif (in frames per second)     [int]
   --resolution            target resolution of output gif                     [list]
